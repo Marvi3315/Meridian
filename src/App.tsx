@@ -121,10 +121,18 @@ export default function App() {
         <div id="timeIndicator" className="absolute top-[58px] left-1/2 -translate-x-1/2 font-cinzel text-[11px] text-[#b48c50]/50 tracking-[0.5em] uppercase drop-shadow-md">Amanecer</div>
         <div id="weatherIndicator" className="absolute top-[60px] left-5 font-cinzel text-[10px] text-[#c8a050]/60 tracking-[0.4em] opacity-0 transition-opacity duration-1000 [&.visible]:opacity-100"></div>
         
-        <div id="minimap" className="absolute top-[58px] right-4 w-[150px] h-[150px] border-2 border-[#b4823c]/50 overflow-hidden bg-[#0a0705]/80 rounded-full shadow-[0_0_20px_rgba(0,0,0,0.8)] backdrop-blur-md">
-          <canvas ref={minimapRef} id="minimapCanvasVisible" width="150" height="150" className="rounded-full"></canvas>
-          <div className="absolute inset-0 rounded-full shadow-[inset_0_0_20px_rgba(0,0,0,1)] pointer-events-none"></div>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-2 bg-[#c8961e] rounded-b-sm"></div>
+        <div id="minimap" className="absolute top-[58px] right-4 w-[160px] h-[160px] border-[3px] border-[#b4823c]/60 overflow-hidden bg-[#0a0705]/90 rounded-full shadow-[0_0_25px_rgba(0,0,0,0.9)] backdrop-blur-md flex items-center justify-center">
+          <canvas ref={minimapRef} id="minimapCanvasVisible" width="160" height="160" className="rounded-full absolute inset-0"></canvas>
+          <div className="absolute inset-0 rounded-full shadow-[inset_0_0_25px_rgba(0,0,0,1)] pointer-events-none"></div>
+          
+          {/* Compass Markers */}
+          <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-cinzel font-bold text-[#c8961e] drop-shadow-md z-10">N</div>
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-cinzel font-bold text-[#b4823c]/70 drop-shadow-md z-10">S</div>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-cinzel font-bold text-[#b4823c]/70 drop-shadow-md z-10">E</div>
+          <div className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-cinzel font-bold text-[#b4823c]/70 drop-shadow-md z-10">W</div>
+          
+          {/* Center Dot */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-[#ffffff] rounded-full shadow-[0_0_5px_rgba(255,255,255,0.8)] z-20"></div>
         </div>
         
         <div className="absolute bottom-[65px] left-5 flex flex-col gap-2 drop-shadow-md">
@@ -172,6 +180,15 @@ export default function App() {
 
         <div id="mission-tracker" className="absolute top-[58px] left-1/2 -translate-x-1/2 flex flex-col gap-1.5 items-center pointer-events-none"></div>
 
+        {/* Reload Circle */}
+        <div id="reload-ui" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-0 transition-opacity duration-300">
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="25" fill="none" stroke="rgba(200, 150, 30, 0.2)" strokeWidth="4" />
+            <circle id="reload-progress" cx="30" cy="30" r="25" fill="none" stroke="#c8961e" strokeWidth="4" strokeDasharray="157" strokeDashoffset="157" transform="rotate(-90 30 30)" />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center font-cinzel text-[10px] text-[#c8961e]">RECARGANDO</div>
+        </div>
+
         <div id="campfire-prompt" className="absolute bottom-[145px] left-1/2 -translate-x-1/2 font-cinzel text-[11px] text-[#d2aa50]/70 tracking-[0.4em] text-center opacity-0 transition-opacity duration-500 pointer-events-none [&.visible]:opacity-100 drop-shadow-md">
           [C] Encender fogata · Reflexionar
         </div>
@@ -203,6 +220,40 @@ export default function App() {
           J — Diario &nbsp;|&nbsp; I — Mochila &nbsp;|&nbsp; M — Mapa &nbsp;|&nbsp; K — Guardar<br/>
           Q — Arma &nbsp;|&nbsp; R — Recargar &nbsp;|&nbsp; Clic — Disparar<br/>
           X / Clic — Cerrar diálogo &nbsp;|&nbsp; Esc — Cerrar paneles
+        </div>
+      </div>
+
+      {/* Shop UI */}
+      <div id="shop-ui" className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(600px,92vw)] max-h-[80vh] bg-[#1a1208]/98 border border-[#c8961e]/40 z-[350] opacity-0 transition-opacity duration-500 pointer-events-none hidden flex-col rounded-lg shadow-[0_30px_80px_rgba(0,0,0,0.9)] backdrop-blur-lg [&.visible]:flex [&.visible]:opacity-100 [&.visible]:pointer-events-auto">
+        <div className="p-5 px-7 border-b border-[#c8961e]/20 flex justify-between items-center shrink-0">
+          <div className="font-cinzel text-[14px] text-[#c8961e] tracking-[0.5em] uppercase">Almacén de Suministros</div>
+          <div className="font-crimson text-[12px] text-[#b4823c]/50 tracking-[0.3em] cursor-pointer hover:text-[#b4823c] transition-colors" onClick={() => (window as any).closeShop()}>[ cerrar ]</div>
+        </div>
+        <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
+          <div className="flex justify-between items-center p-4 bg-black/30 border border-[#c8961e]/10 rounded hover:border-[#c8961e]/30 transition-colors">
+            <div>
+              <div className="font-cinzel text-sm text-[#c8961e]">Caja de Balas (x6)</div>
+              <div className="font-crimson italic text-xs text-[#b48c50]">Munición estándar para tu revólver.</div>
+            </div>
+            <button className="font-cinzel text-xs px-4 py-2 border border-[#c8961e] hover:bg-[#c8961e] hover:text-[#1a1208] transition-all" onClick={() => (window as any).buyItem('ammo', 5)}>$5</button>
+          </div>
+          <div className="flex justify-between items-center p-4 bg-black/30 border border-[#c8961e]/10 rounded hover:border-[#c8961e]/30 transition-colors">
+            <div>
+              <div className="font-cinzel text-sm text-[#c8961e]">Tónico de Salud</div>
+              <div className="font-crimson italic text-xs text-[#b48c50]">Restaura 50 puntos de vida.</div>
+            </div>
+            <button className="font-cinzel text-xs px-4 py-2 border border-[#c8961e] hover:bg-[#c8961e] hover:text-[#1a1208] transition-all" onClick={() => (window as any).buyItem('health', 10)}>$10</button>
+          </div>
+          <div className="flex justify-between items-center p-4 bg-black/30 border border-[#c8961e]/10 rounded hover:border-[#c8961e]/30 transition-colors">
+            <div>
+              <div className="font-cinzel text-sm text-[#c8961e]">Manzana para Ceniza</div>
+              <div className="font-crimson italic text-xs text-[#b48c50]">Restaura la estamina de tu caballo.</div>
+            </div>
+            <button className="font-cinzel text-xs px-4 py-2 border border-[#c8961e] hover:bg-[#c8961e] hover:text-[#1a1208] transition-all" onClick={() => (window as any).buyItem('stamina', 8)}>$8</button>
+          </div>
+        </div>
+        <div className="p-4 px-7 border-t border-[#c8961e]/10 bg-black/20 text-center">
+          <div className="font-cinzel text-xs text-[#b48c50]/60 tracking-[0.2em]">TU DINERO: <span id="shop-money" className="text-[#c8961e]">$15</span></div>
         </div>
       </div>
 

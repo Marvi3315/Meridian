@@ -13,7 +13,7 @@ const G = {
         dead: false
     },
     horse: {
-        mesh: null as THREE.Mesh | null,
+        mesh: null as THREE.Group | null,
         stamina: 100,
         near: false
     },
@@ -21,23 +21,47 @@ const G = {
     timeSpeed: 0.0001,
     npcs: [] as any[],
     campfires: [] as any[],
+    fragments: [] as any[],
+    houses: [] as any[],
+    obstacles: [] as any[],
+    effects: [] as any[],
+    canJump: true,
+    isReloading: false,
+    reloadProgress: 0,
+    money: 15,
+    footstepTimer: 0,
+    weaponMesh: null as THREE.Group | null,
+    weaponBob: 0,
+    weaponRecoil: 0,
     interactTarget: null as any,
     monologueOpen: false,
     mapOpen: false,
+    mapZoom: 2,
+    mapOffset: new THREE.Vector2(0, 0),
     inventoryOpen: false,
     journalOpen: false,
     dlgTimer: 0,
     gallopTimer: 0,
-    houses: [] as THREE.Mesh[],
-    obstacles: [] as THREE.Object3D[],
-    fragments: [] as any[],
-    effects: [] as any[],
     muzzleFlash: null as THREE.PointLight | null,
     missions: [
         { id: 'horse', text: 'Encuentra a tu caballo Ceniza', completed: false, type: 'location', target: null as THREE.Vector3 | null, reward: { honor: 10, text: '+10 Honor' } as any },
-        { id: 'bandits', text: 'Elimina a 5 bandidos', completed: false, type: 'kill', targetCount: 5, currentCount: 0, reward: { honor: 20, ammo: 6, text: '+20 Honor, +6 Balas' } as any },
-        { id: 'fragment', text: 'Encuentra un fragmento del pasado', completed: false, type: 'collect', target: null as THREE.Vector3 | null, reward: { honor: 30, text: '+30 Honor' } as any },
-        { id: 'town', text: 'Llega al pueblo', completed: false, type: 'location', target: null as THREE.Vector3 | null, reward: { honor: 50, health: 100, text: '+50 Honor, Salud al máximo' } as any }
+        { id: 'sheriff_intro', text: 'Llega al pueblo y habla con el Sheriff', completed: false, type: 'talk', targetNpc: 'Sheriff', target: null as THREE.Vector3 | null, reward: { honor: 20, text: '+20 Honor' } as any },
+        { id: 'bandits', text: 'Elimina a 5 bandidos para el Sheriff', completed: false, type: 'kill', targetCount: 5, currentCount: 0, reward: { honor: 50, ammo: 12, text: '+50 Honor, +12 Balas' } as any },
+        { id: 'sheriff_return', text: 'Vuelve con el Sheriff', completed: false, type: 'talk', targetNpc: 'Sheriff', target: null as THREE.Vector3 | null, reward: { honor: 10, text: '+10 Honor' } as any },
+        { id: 'doctor_intro', text: 'Habla con el Doctor del pueblo', completed: false, type: 'talk', targetNpc: 'Doctor', target: null as THREE.Vector3 | null, reward: { honor: 10, text: '+10 Honor' } as any },
+        { id: 'fragment', text: 'Encuentra 3 hierbas curativas (fragmentos)', completed: false, type: 'collect', targetCount: 3, currentCount: 0, target: null as THREE.Vector3 | null, reward: { honor: 30, health: 100, text: '+30 Honor, Salud al máximo' } as any },
+        { id: 'doctor_return', text: 'Entrega las hierbas al Doctor', completed: false, type: 'talk', targetNpc: 'Doctor', target: null as THREE.Vector3 | null, reward: { honor: 20, text: '+20 Honor' } as any },
+        { id: 'miner_intro', text: 'Habla con el Viejo Minero', completed: false, type: 'talk', targetNpc: 'Viejo Minero', target: null as THREE.Vector3 | null, reward: { honor: 10, text: '+10 Honor' } as any },
+        { id: 'boss', text: 'Elimina al líder de los bandidos', completed: false, type: 'kill_boss', targetCount: 1, currentCount: 0, reward: { honor: 100, text: '+100 Honor, El pueblo es libre' } as any },
+        { id: 'miner_return', text: 'Informa al Viejo Minero', completed: false, type: 'talk', targetNpc: 'Viejo Minero', target: null as THREE.Vector3 | null, reward: { honor: 20, text: '+20 Honor' } as any },
+        { id: 'sheriff_finale', text: 'Informa al Sheriff de tu victoria', completed: false, type: 'talk', targetNpc: 'Sheriff', target: null as THREE.Vector3 | null, reward: { honor: 50, text: '+50 Honor' } as any },
+        { id: 'bandits_2', text: 'Limpia las afueras (10 bandidos)', completed: false, type: 'kill', targetCount: 10, currentCount: 0, reward: { honor: 60, ammo: 24, text: '+60 Honor, +24 Balas' } as any },
+        { id: 'doctor_relics_intro', text: 'Habla con el Doctor sobre las reliquias', completed: false, type: 'talk', targetNpc: 'Doctor', target: null as THREE.Vector3 | null, reward: { honor: 10, text: '+10 Honor' } as any },
+        { id: 'fragment_2', text: 'Encuentra 5 reliquias perdidas', completed: false, type: 'collect', targetCount: 5, currentCount: 0, target: null as THREE.Vector3 | null, reward: { honor: 40, text: '+40 Honor' } as any },
+        { id: 'doctor_finale', text: 'Lleva las reliquias al Doctor', completed: false, type: 'talk', targetNpc: 'Doctor', target: null as THREE.Vector3 | null, reward: { honor: 30, health: 100, text: '+30 Honor, +100 Salud' } as any },
+        { id: 'shop_intro', text: 'Habla con el Tendero sobre suministros', completed: false, type: 'talk', targetNpc: 'Tendero', target: null as THREE.Vector3 | null, reward: { honor: 10, text: '+10 Honor' } as any },
+        { id: 'buy_ammo', text: 'Compra munición en la tienda', completed: false, type: 'buy', targetItem: 'ammo', reward: { honor: 20, text: '+20 Honor' } as any },
+        { id: 'sheriff_epilogue', text: 'Habla con el Sheriff por última vez', completed: false, type: 'talk', targetNpc: 'Sheriff', target: null as THREE.Vector3 | null, reward: { honor: 100, text: '+100 Honor, Fin de la demo' } as any }
     ],
     currentMission: 0
 };
@@ -134,6 +158,39 @@ function playReloadSound() {
     } catch(e) {}
 }
 
+function playFootstep() {
+    if (!audioCtx || !masterGain) return;
+    try {
+        const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.1, audioCtx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) {
+            d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.02));
+        }
+        const src = audioCtx.createBufferSource(); src.buffer = buf;
+        const flt = audioCtx.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 400;
+        const g = audioCtx.createGain(); g.gain.value = 0.1;
+        src.connect(flt); flt.connect(g); g.connect(masterGain);
+        src.start();
+    } catch(e) {}
+}
+
+function playEnemyFootstep(distance: number) {
+    if (!audioCtx || !masterGain || distance > 30) return;
+    try {
+        const volume = Math.max(0, 0.05 * (1 - distance / 30));
+        const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.1, audioCtx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) {
+            d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.02));
+        }
+        const src = audioCtx.createBufferSource(); src.buffer = buf;
+        const flt = audioCtx.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 300;
+        const g = audioCtx.createGain(); g.gain.value = volume;
+        src.connect(flt); flt.connect(g); g.connect(masterGain);
+        src.start();
+    } catch(e) {}
+}
+
 // --- UI HELPERS ---
 function showNotif(msg: string, duration = 3000) {
     const el = document.getElementById('notification');
@@ -187,68 +244,12 @@ let velocity = new THREE.Vector3();
 let direction = new THREE.Vector3();
 
 // --- 3D OBJECT GENERATORS ---
-function createCactus() {
-    const group = new THREE.Group();
-    const mat = new THREE.MeshLambertMaterial({ color: 0x2e8b57 });
-    
-    // Main trunk
-    const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.8, 4, 0.8), mat);
-    trunk.position.y = 2;
-    trunk.castShadow = true;
-    trunk.receiveShadow = true;
-    group.add(trunk);
-    
-    // Left arm
-    if (Math.random() > 0.3) {
-        const armGeo = new THREE.BoxGeometry(1.2, 0.6, 0.6);
-        const arm = new THREE.Mesh(armGeo, mat);
-        arm.position.set(-1, 2.5, 0);
-        arm.castShadow = true;
-        arm.receiveShadow = true;
-        group.add(arm);
-        
-        const upArm = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.5, 0.6), mat);
-        upArm.position.set(-1.3, 3.25, 0);
-        upArm.castShadow = true;
-        upArm.receiveShadow = true;
-        group.add(upArm);
-    }
-    
-    // Right arm
-    if (Math.random() > 0.3) {
-        const armGeo = new THREE.BoxGeometry(1.2, 0.6, 0.6);
-        const arm = new THREE.Mesh(armGeo, mat);
-        arm.position.set(1, 1.5, 0);
-        arm.castShadow = true;
-        arm.receiveShadow = true;
-        group.add(arm);
-        
-        const upArm = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.5, 0.6), mat);
-        upArm.position.set(1.3, 2.25, 0);
-        upArm.castShadow = true;
-        upArm.receiveShadow = true;
-        group.add(upArm);
-    }
-    
-    return group;
-}
-
-function createRock() {
-    const geo = new THREE.DodecahedronGeometry(Math.random() * 1.5 + 0.5, 0);
-    const mat = new THREE.MeshLambertMaterial({ color: 0x7a7a7a, flatShading: true });
-    const rock = new THREE.Mesh(geo, mat);
-    rock.scale.set(1, Math.random() * 0.5 + 0.5, 1);
-    rock.castShadow = true;
-    rock.receiveShadow = true;
-    return rock;
-}
-
-function createNPC() {
+function createNPC(isFriendly = false, name = "Bandido", color = 0x8b0000, dialogues: string[] = []) {
     const group = new THREE.Group();
     
     // Materials
     const skinMat = new THREE.MeshLambertMaterial({ color: 0xffcc99 });
-    const shirtMat = new THREE.MeshLambertMaterial({ color: 0x8b0000 }); // Red shirt for bandits
+    const shirtMat = new THREE.MeshLambertMaterial({ color: color }); // Dynamic shirt color
     const pantsMat = new THREE.MeshLambertMaterial({ color: 0x1a1a1a });
     const hatMat = new THREE.MeshLambertMaterial({ color: 0x3e2723 });
     
@@ -297,6 +298,179 @@ function createNPC() {
     armR.position.set(0.55, 1.25, 0);
     armR.castShadow = true;
     group.add(armR);
+    
+    (group as any).isNPC = true;
+    (group as any).isFriendly = isFriendly;
+    (group as any).name = name;
+    (group as any).dialogues = dialogues;
+    (group as any).dialogueIndex = 0;
+    
+    return group;
+}
+
+function createCampfire() {
+    const group = new THREE.Group();
+    
+    // Logs
+    const logMat = new THREE.MeshLambertMaterial({ color: 0x4a2e15 });
+    for (let i = 0; i < 3; i++) {
+        const log = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1), logMat);
+        log.rotation.x = Math.PI / 2;
+        log.rotation.z = (i * Math.PI) / 3;
+        log.position.y = 0.1;
+        group.add(log);
+    }
+    
+    // Fire light
+    const light = new THREE.PointLight(0xffa500, 2, 10);
+    light.position.y = 0.5;
+    group.add(light);
+    
+    // Fire particles
+    const fireGeo = new THREE.BufferGeometry();
+    const fireCount = 20;
+    const firePos = new Float32Array(fireCount * 3);
+    for (let i = 0; i < fireCount; i++) {
+        firePos[i * 3] = (Math.random() - 0.5) * 0.5;
+        firePos[i * 3 + 1] = Math.random() * 0.5;
+        firePos[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
+    }
+    fireGeo.setAttribute('position', new THREE.BufferAttribute(firePos, 3));
+    const fireMat = new THREE.PointsMaterial({ color: 0xff4500, size: 0.2, transparent: true, opacity: 0.8 });
+    const fireParticles = new THREE.Points(fireGeo, fireMat);
+    group.add(fireParticles);
+    
+    (group as any).isCampfire = true;
+    (group as any).light = light;
+    (group as any).particles = fireParticles;
+    
+    return group;
+}
+
+function createParticleBurst(position: THREE.Vector3, color: number) {
+    const geo = new THREE.BufferGeometry();
+    const count = 30;
+    const pos = new Float32Array(count * 3);
+    const vels = [];
+    for (let i = 0; i < count; i++) {
+        pos[i * 3] = position.x;
+        pos[i * 3 + 1] = position.y;
+        pos[i * 3 + 2] = position.z;
+        vels.push(new THREE.Vector3((Math.random() - 0.5) * 5, Math.random() * 5, (Math.random() - 0.5) * 5));
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const mat = new THREE.PointsMaterial({ color: color, size: 0.2, transparent: true, opacity: 1 });
+    const points = new THREE.Points(geo, mat);
+    scene.add(points);
+    G.effects.push({ mesh: points, vels: vels, life: 1.0 });
+}
+
+function flashScreenRed() {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(255, 0, 0, 0.4)';
+    overlay.style.pointerEvents = 'none';
+    overlay.style.zIndex = '9999';
+    overlay.style.transition = 'opacity 0.3s ease-out';
+    document.body.appendChild(overlay);
+    
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 300);
+    }, 50);
+}
+
+function flashScreenGreen() {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+    overlay.style.pointerEvents = 'none';
+    overlay.style.zIndex = '9999';
+    overlay.style.transition = 'opacity 0.5s ease-out';
+    document.body.appendChild(overlay);
+    
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 500);
+    }, 50);
+}
+
+function flashScreenGold() {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(200, 150, 30, 0.3)';
+    overlay.style.pointerEvents = 'none';
+    overlay.style.zIndex = '9999';
+    overlay.style.transition = 'opacity 0.8s ease-out';
+    document.body.appendChild(overlay);
+    
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 800);
+    }, 50);
+}
+
+function createCactus() {
+    const group = new THREE.Group();
+    const mat = new THREE.MeshLambertMaterial({ color: 0x2d5a27 });
+    
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 3), mat);
+    trunk.position.y = 1.5;
+    group.add(trunk);
+    
+    // Arms
+    const arm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 1.5), mat);
+    arm1.position.set(0.6, 2, 0);
+    arm1.rotation.z = Math.PI / 2;
+    group.add(arm1);
+    
+    const arm1Up = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 1), mat);
+    arm1Up.position.set(1.2, 2.4, 0);
+    group.add(arm1Up);
+    
+    const arm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 1.2), mat);
+    arm2.position.set(-0.5, 1.5, 0);
+    arm2.rotation.z = -Math.PI / 2;
+    group.add(arm2);
+    
+    const arm2Up = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.8), mat);
+    arm2Up.position.set(-0.9, 1.8, 0);
+    group.add(arm2Up);
+    
+    group.traverse(c => {
+        if (c instanceof THREE.Mesh) {
+            c.castShadow = true;
+            c.receiveShadow = true;
+        }
+    });
+    
+    return group;
+}
+
+function createRock() {
+    const group = new THREE.Group();
+    const mat = new THREE.MeshLambertMaterial({ color: 0x8b7355 });
+    
+    const size = 0.5 + Math.random() * 1.5;
+    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(size, 0), mat);
+    rock.scale.set(1, 0.6 + Math.random() * 0.4, 1);
+    rock.rotation.set(Math.random(), Math.random(), Math.random());
+    rock.position.y = size * 0.4;
+    rock.castShadow = true;
+    rock.receiveShadow = true;
+    group.add(rock);
     
     return group;
 }
@@ -413,6 +587,39 @@ function createFragment() {
     return mesh;
 }
 
+function createWeapon() {
+    const group = new THREE.Group();
+    
+    const ironMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.2, metalness: 0.8 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x4a3018, roughness: 0.8 });
+    
+    // Barrel
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.8, 8), ironMat);
+    barrel.rotation.x = Math.PI / 2;
+    barrel.position.z = -0.4;
+    group.add(barrel);
+    
+    // Cylinder
+    const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.2, 8), ironMat);
+    cylinder.rotation.x = Math.PI / 2;
+    cylinder.position.z = -0.05;
+    group.add(cylinder);
+    
+    // Grip
+    const grip = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.15), woodMat);
+    grip.position.set(0, -0.2, 0.05);
+    grip.rotation.x = -0.2;
+    group.add(grip);
+    
+    // Frame
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.15, 0.3), ironMat);
+    frame.position.z = -0.1;
+    group.add(frame);
+    
+    group.position.set(0.4, -0.4, -0.6);
+    return group;
+}
+
 function init3D() {
     const canvas = (window as any).gameCanvas || document.getElementById('gameCanvas') as HTMLCanvasElement;
     if (!canvas) return;
@@ -433,6 +640,11 @@ function init3D() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
 
+    // First person weapon
+    G.weaponMesh = createWeapon();
+    camera.add(G.weaponMesh);
+    scene.add(camera); // Ensure camera is in scene to see children
+
     controls = new PointerLockControls(camera, document.body);
     
     // Click to lock pointer
@@ -445,6 +657,7 @@ function init3D() {
                 if (G.player.ammo > 0 && G.player.shootCooldown <= 0) {
                     G.player.ammo--;
                     G.player.shootCooldown = 0.5;
+                    G.weaponRecoil = 1.0; // Trigger recoil
                     updateAmmoHUD();
                     
                     // Flash effect
@@ -468,6 +681,7 @@ function init3D() {
                             hitNPC.health -= 50;
                             if (hitNPC.health <= 0) {
                                 hitNPC.isDead = true;
+                                createParticleBurst(hitNPC.position, 0xff0000);
                                 hitNPC.children.forEach((child: any) => {
                                     if (child.material) child.material.color.setHex(0x444444);
                                 });
@@ -578,23 +792,87 @@ function gen3DWorld() {
 
     // Generate NPCs (Bandits)
     for (let i = 0; i < 30; i++) {
-        const npc = createNPC();
+        const npc = createNPC(false, "Bandido", 0x8b0000, ['"¿Qué miras, forastero? Sigue tu camino."']);
         npc.position.x = Math.random() * 200 - 100;
         npc.position.z = Math.random() * 200 - 100;
         npc.position.y = 0;
-        (npc as any).isNPC = true;
         (npc as any).health = 100;
         (npc as any).wanderAngle = Math.random() * Math.PI * 2;
         (npc as any).wanderTimer = 0;
         scene.add(npc);
         G.npcs.push(npc);
     }
+    
+    // Generate Boss Bandit
+    const boss = createNPC(false, "Líder Bandido", 0x4a0000, ['"¡Nadie sale vivo de mi territorio!"']);
+    boss.position.x = 80;
+    boss.position.z = -80;
+    boss.position.y = 0;
+    boss.scale.set(1.2, 1.2, 1.2);
+    (boss as any).health = 300;
+    (boss as any).isBoss = true;
+    (boss as any).wanderAngle = Math.random() * Math.PI * 2;
+    (boss as any).wanderTimer = 0;
+    scene.add(boss);
+    G.npcs.push(boss);
 
-    // Generate Fragments
-    for (let i = 0; i < 3; i++) {
+    // Generate Friendly NPCs in Town (near the first house)
+    if (G.houses.length > 0) {
+        const townCenter = G.houses[0].position.clone();
+        
+        const sheriff = createNPC(true, "Sheriff", 0x2b4a6f, [
+            '"Forastero, este pueblo necesita ayuda. Hay demasiados bandidos."',
+            '"Acaba con 5 de ellos y te recompensaré."',
+            '"Buen trabajo. Ahora ve a ver al Doctor, necesita ayuda."',
+            '"¡Has derrotado a su líder! Limpia las afueras del pueblo, elimina a 10 bandidos más."',
+            '"El pueblo está finalmente a salvo. Gracias, forastero."'
+        ]);
+        sheriff.position.copy(townCenter).add(new THREE.Vector3(5, 0, 5));
+        scene.add(sheriff);
+        G.npcs.push(sheriff);
+        
+        const doctor = createNPC(true, "Doctor", 0xeeeeee, [
+            '"Saludos. Mis suministros médicos se han agotado."',
+            '"¿Podrías buscar 3 hierbas curativas (fragmentos) en el desierto?"',
+            '"¡Gracias! Con esto podré tratar a los heridos. Ve a hablar con el Viejo Minero."',
+            '"He oído rumores de unas reliquias antiguas en el desierto. ¿Podrías buscar 5 de ellas?"',
+            '"Estas reliquias son invaluables. Has salvado muchas vidas hoy."'
+        ]);
+        doctor.position.copy(townCenter).add(new THREE.Vector3(-5, 0, 5));
+        scene.add(doctor);
+        G.npcs.push(doctor);
+        
+        const miner = createNPC(true, "Viejo Minero", 0x8b6b4a, [
+            '"*Tos*... Ese líder bandido me robó todo mi oro."',
+            '"Está escondido lejos, al noreste. Si lo eliminas, el desierto será libre."',
+            '"¡Lo lograste! Eres una leyenda en estas tierras."'
+        ]);
+        miner.position.copy(townCenter).add(new THREE.Vector3(0, 0, -6));
+        scene.add(miner);
+        G.npcs.push(miner);
+        
+        const shopkeeper = createNPC(true, "Tendero", 0x4a2b2b, [
+            '"Bienvenido al almacén. Tengo lo que necesitas para sobrevivir."',
+            '"¿Buscas algo en particular? El dinero habla en estas tierras."',
+            '"Vuelve cuando tengas más oro, forastero."'
+        ]);
+        shopkeeper.position.copy(townCenter).add(new THREE.Vector3(8, 0, -2));
+        (shopkeeper as any).isShop = true;
+        scene.add(shopkeeper);
+        G.npcs.push(shopkeeper);
+        
+        // Add campfire
+        const campfire = createCampfire();
+        campfire.position.copy(townCenter).add(new THREE.Vector3(0, 0, 8));
+        scene.add(campfire);
+        G.campfires.push(campfire);
+    }
+
+    // Generate Fragments (Herbs/Relics)
+    for (let i = 0; i < 15; i++) {
         const frag = createFragment();
-        frag.position.x = Math.random() * 80 - 40;
-        frag.position.z = Math.random() * 80 - 40;
+        frag.position.x = Math.random() * 160 - 80;
+        frag.position.z = Math.random() * 160 - 80;
         scene.add(frag);
         G.fragments.push(frag);
     }
@@ -615,6 +893,26 @@ function gen3DWorld() {
     if (G.houses.length > 0) {
         G.missions[3].target = G.houses[0].position;
     }
+    // Extra Environment
+    for (let i = 0; i < 60; i++) {
+        const cactus = createCactus();
+        cactus.position.x = Math.random() * 500 - 250;
+        cactus.position.z = Math.random() * 500 - 250;
+        if (cactus.position.length() > 30) {
+            scene.add(cactus);
+            G.obstacles.push(cactus);
+        }
+    }
+    for (let i = 0; i < 100; i++) {
+        const rock = createRock();
+        rock.position.x = Math.random() * 600 - 300;
+        rock.position.z = Math.random() * 600 - 300;
+        if (rock.position.length() > 20) {
+            scene.add(rock);
+            G.obstacles.push(rock);
+        }
+    }
+
     updateMissionUI();
 }
 
@@ -625,7 +923,7 @@ function updateMissionUI() {
     if (G.currentMission < G.missions.length) {
         const m = G.missions[G.currentMission];
         let progress = '';
-        if (m.type === 'kill') {
+        if (m.type === 'kill' || m.type === 'collect' || m.type === 'kill_boss') {
             progress = ` (${m.currentCount}/${m.targetCount})`;
         }
         let rewardHtml = '';
@@ -643,6 +941,85 @@ function updateMissionUI() {
     }
 }
 
+function advanceMission() {
+    const m = G.missions[G.currentMission];
+    m.completed = true;
+    
+    // Apply rewards
+    if (m.reward) {
+        if (m.reward.honor) changeHonor(m.reward.honor, 'Recompensa de misión');
+        if (m.reward.ammo) {
+            G.player.ammo = Math.min(6, G.player.ammo + m.reward.ammo);
+            updateAmmoHUD();
+        }
+        if (m.reward.health) {
+            G.player.health = Math.min(100, G.player.health + m.reward.health);
+            updateHealthHUD();
+        }
+    }
+    
+    G.currentMission++;
+    playMissionCompleteSound();
+    flashScreenGold();
+    const rewardText = m.reward ? `\n<span class="text-[#c8961e] text-sm">Recompensa: ${m.reward.text}</span>` : '';
+    showNotif(`¡Misión Completada!${rewardText}`, 5000);
+    
+    // Set next target
+    if (G.currentMission < G.missions.length) {
+        const nextM = G.missions[G.currentMission];
+        if (nextM.type === 'talk') {
+            const targetNpc = G.npcs.find((n: any) => n.name === nextM.targetNpc);
+            if (targetNpc) nextM.target = targetNpc.position;
+        } else if (nextM.type === 'kill_boss') {
+            const boss = G.npcs.find((n: any) => n.isBoss);
+            if (boss) nextM.target = boss.position;
+        } else if (nextM.type === 'collect' && G.fragments.length > 0) {
+            nextM.target = G.fragments[0].position;
+        }
+    }
+    
+    updateMissionUI();
+    
+    if (G.currentMission >= G.missions.length) {
+        // End of demo
+        setTimeout(() => {
+            const epilogue = document.getElementById('epilogue-screen');
+            if (epilogue) {
+                epilogue.classList.add('visible');
+                epilogue.classList.add('solid');
+                
+                const badge = document.getElementById('epi-badge');
+                if (badge) badge.textContent = '⭐';
+                
+                const title = document.getElementById('epi-ending-title');
+                if (title) title.textContent = 'Leyenda del Desierto';
+                
+                const narrative = document.getElementById('epi-narrative');
+                if (narrative) narrative.innerHTML = '<p>Has limpiado el desierto de bandidos, recuperado las reliquias antiguas y devuelto la paz al pueblo de Ceniza.</p><p>Tu nombre será recordado por generaciones.</p>';
+                
+                const stats = document.getElementById('epi-stats');
+                if (stats) stats.innerHTML = `
+                    <div class="epilogue-stat">
+                        <div class="epilogue-stat-label">Honor Final</div>
+                        <div class="epilogue-stat-value">${G.player.honor}</div>
+                    </div>
+                    <div class="epilogue-stat">
+                        <div class="epilogue-stat-label">Misiones Completadas</div>
+                        <div class="epilogue-stat-value">${G.missions.length}</div>
+                    </div>
+                `;
+                
+                const quote = document.getElementById('epi-quote');
+                if (quote) quote.textContent = '"El desierto no perdona, pero tú has demostrado ser más implacable que sus arenas."';
+                
+                const quoteAttr = document.getElementById('epi-quote-attr');
+                if (quoteAttr) quoteAttr.textContent = '— El Viejo Minero';
+            }
+            controls.unlock();
+        }, 2000);
+    }
+}
+
 function checkMissions() {
     if (G.currentMission >= G.missions.length) return;
     
@@ -651,35 +1028,16 @@ function checkMissions() {
     
     if (m.id === 'horse' && G.player.mounted) {
         completed = true;
-    } else if (m.id === 'town' && m.target && camera.position.distanceTo(m.target) < 20) {
+    } else if (m.type === 'kill' && m.currentCount! >= m.targetCount!) {
         completed = true;
-    } else if (m.id === 'bandits' && m.currentCount! >= m.targetCount!) {
+    } else if (m.type === 'collect' && m.currentCount! >= m.targetCount!) {
         completed = true;
-    } else if (m.id === 'fragment' && m.currentCount! >= 1) {
+    } else if (m.type === 'kill_boss' && m.currentCount! >= m.targetCount!) {
         completed = true;
     }
     
     if (completed) {
-        m.completed = true;
-        
-        // Apply rewards
-        if (m.reward) {
-            if (m.reward.honor) changeHonor(m.reward.honor, 'Recompensa de misión');
-            if (m.reward.ammo) {
-                G.player.ammo = Math.min(6, G.player.ammo + m.reward.ammo);
-                updateAmmoHUD();
-            }
-            if (m.reward.health) {
-                G.player.health = Math.min(100, G.player.health + m.reward.health);
-                updateHealthHUD();
-            }
-        }
-        
-        G.currentMission++;
-        playMissionCompleteSound();
-        const rewardText = m.reward ? `\n<span class="text-[#c8961e] text-sm">Recompensa: ${m.reward.text}</span>` : '';
-        showNotif(`¡Misión Completada!${rewardText}`, 5000);
-        updateMissionUI();
+        advanceMission();
     }
 }
 
@@ -690,7 +1048,24 @@ function onWindowResize() {
 }
 
 function onKeyDown(event: KeyboardEvent) {
-    if (!controls.isLocked) return;
+    if (G.player.dead) return;
+    
+    // Allow closing UI with keys even if controls are unlocked
+    if (!controls.isLocked) {
+        if (event.code === 'KeyM' && G.mapOpen) { (window as any).closeWorldMap(); return; }
+        if (event.code === 'KeyI' && G.inventoryOpen) { (window as any).closeInventory(); return; }
+        if (event.code === 'KeyJ' && G.journalOpen) { (window as any).closeJournal(); return; }
+        if (event.code === 'Escape') {
+            if (G.mapOpen) (window as any).closeWorldMap();
+            if (G.inventoryOpen) (window as any).closeInventory();
+            if (G.journalOpen) (window as any).closeJournal();
+            if (G.monologueOpen) (window as any).closeMonologue();
+            return;
+        }
+        // If it's not a UI key, ignore it if unlocked
+        if (event.code !== 'KeyM' && event.code !== 'KeyI' && event.code !== 'KeyJ') return;
+    }
+
     switch (event.code) {
         case 'ArrowUp':
         case 'KeyW': moveForward = true; break;
@@ -702,11 +1077,18 @@ function onKeyDown(event: KeyboardEvent) {
         case 'KeyD': moveRight = true; break;
         case 'ShiftLeft': isRunning = true; break;
         case 'KeyR':
-            if (G.player.ammo < 6) {
-                G.player.ammo = 6;
-                updateAmmoHUD();
+            if (G.player.ammo < 6 && !G.isReloading) {
+                G.isReloading = true;
+                G.reloadProgress = 0;
+                const reloadUI = document.getElementById('reload-ui');
+                if (reloadUI) reloadUI.style.opacity = '1';
                 playReloadSound();
-                showNotif('Recargado');
+            }
+            break;
+        case 'Space':
+            if (G.canJump && !G.player.mounted && controls.isLocked) {
+                velocity.y += 350;
+                G.canJump = false;
             }
             break;
         case 'KeyF':
@@ -740,6 +1122,7 @@ function onKeyDown(event: KeyboardEvent) {
         case 'KeyE':
             if (G.interactTarget && !G.interactTarget.isDead) {
                 if (G.interactTarget.isFragment) {
+                    createParticleBurst(G.interactTarget.position, 0x00ff00);
                     scene.remove(G.interactTarget);
                     G.fragments = G.fragments.filter(f => f !== G.interactTarget);
                     G.interactTarget = null;
@@ -751,8 +1134,9 @@ function onKeyDown(event: KeyboardEvent) {
                     if (statFrags) statFrags.textContent = (parseInt(statFrags.textContent || '0') + 1).toString();
                     
                     // Update mission
-                    if (G.currentMission < G.missions.length && G.missions[G.currentMission].id === 'fragment') {
-                        G.missions[G.currentMission].currentCount = 1;
+                    if (G.currentMission < G.missions.length && G.missions[G.currentMission].type === 'collect') {
+                        G.missions[G.currentMission].currentCount!++;
+                        updateMissionUI();
                         checkMissions();
                     }
                     
@@ -763,11 +1147,46 @@ function onKeyDown(event: KeyboardEvent) {
                     const m = document.getElementById('monologue-screen');
                     if (m) m.classList.add('visible');
                     const text = document.getElementById('monologueText');
-                    if (text) text.textContent = '"¿Qué miras, forastero? Sigue tu camino."';
                     const attr = document.getElementById('monologueAttr');
-                    if (attr) attr.textContent = '— Bandido';
+                    
+                    const npc = G.interactTarget as any;
+                    let dialogue = '"¿Qué miras, forastero? Sigue tu camino."';
+                    
+                    if (npc.dialogues && npc.dialogues.length > 0) {
+                        // Check if this NPC is the target of the current 'talk' mission
+                        if (G.currentMission < G.missions.length) {
+                            const curM = G.missions[G.currentMission];
+                            if (curM.type === 'talk' && curM.targetNpc === npc.name) {
+                                // Advance mission
+                                advanceMission();
+                                
+                                // Advance dialogue index if possible
+                                if (npc.dialogueIndex < npc.dialogues.length - 1) {
+                                    npc.dialogueIndex++;
+                                }
+                            }
+                        }
+                        dialogue = npc.dialogues[npc.dialogueIndex];
+                    }
+                    
+                    if (text) text.textContent = dialogue;
+                    if (attr) attr.textContent = `— ${npc.name || 'Bandido'}`;
+                    
+                    if (npc.isShop) {
+                        setTimeout(() => {
+                            (window as any).openShop();
+                        }, 1000);
+                    }
+                    
                     controls.unlock();
                 }
+            } else if (G.interactTarget && G.interactTarget.isCampfire) {
+                // Campfire interaction
+                G.player.health = 100;
+                updateHealthHUD();
+                flashScreenGreen();
+                createParticleBurst(G.interactTarget.position, 0x00ff00);
+                showNotif('Salud restaurada en la fogata');
             }
             break;
         case 'KeyC':
@@ -872,80 +1291,7 @@ function onKeyDown(event: KeyboardEvent) {
                 if (m) m.classList.add('flex');
                 controls.unlock();
                 
-                // Draw map
-                const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement;
-                if (mapCanvas) {
-                    mapCanvas.width = mapCanvas.clientWidth;
-                    mapCanvas.height = mapCanvas.clientHeight;
-                    const ctx = mapCanvas.getContext('2d');
-                    if (ctx) {
-                        ctx.fillStyle = '#0e0a05';
-                        ctx.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
-                        
-                        // Draw player
-                        ctx.fillStyle = '#c8961e';
-                        ctx.beginPath();
-                        ctx.arc(mapCanvas.width / 2, mapCanvas.height / 2, 5, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        // Draw NPCs
-                        ctx.fillStyle = '#8b0000';
-                        for (const npc of G.npcs) {
-                            if (!npc.isDead) {
-                                const nx = mapCanvas.width / 2 + (npc.position.x - camera.position.x) * 2;
-                                const ny = mapCanvas.height / 2 + (npc.position.z - camera.position.z) * 2;
-                                ctx.beginPath();
-                                ctx.arc(nx, ny, 3, 0, Math.PI * 2);
-                                ctx.fill();
-                            }
-                        }
-                        
-                        // Draw Houses
-                        ctx.fillStyle = '#4a3018';
-                        for (const house of G.houses) {
-                            const hx = mapCanvas.width / 2 + (house.position.x - camera.position.x) * 2;
-                            const hy = mapCanvas.height / 2 + (house.position.z - camera.position.z) * 2;
-                            ctx.fillRect(hx - 4, hy - 4, 8, 8);
-                        }
-                        
-                        // Draw Horse
-                        if (!G.player.mounted && G.horse.mesh) {
-                            ctx.fillStyle = '#5c4033';
-                            const hx = mapCanvas.width / 2 + (G.horse.mesh.position.x - camera.position.x) * 2;
-                            const hy = mapCanvas.height / 2 + (G.horse.mesh.position.z - camera.position.z) * 2;
-                            ctx.beginPath();
-                            ctx.arc(hx, hy, 4, 0, Math.PI * 2);
-                            ctx.fill();
-                            ctx.strokeStyle = '#c8961e';
-                            ctx.stroke();
-                        }
-                        
-                        // Draw Mission Target
-                        if (G.currentMission < G.missions.length) {
-                            const m = G.missions[G.currentMission];
-                            if (m.target) {
-                                const tx = mapCanvas.width / 2 + (m.target.x - camera.position.x) * 2;
-                                const ty = mapCanvas.height / 2 + (m.target.z - camera.position.z) * 2;
-                                ctx.fillStyle = '#ffff00';
-                                ctx.beginPath();
-                                ctx.arc(tx, ty, 6, 0, Math.PI * 2);
-                                ctx.fill();
-                                ctx.strokeStyle = '#000';
-                                ctx.stroke();
-                            }
-                        }
-                    }
-                    
-                    // Update stats
-                    const statMissions = document.getElementById('map-stat-missions');
-                    if (statMissions) statMissions.textContent = `${G.currentMission}/${G.missions.length}`;
-                    const statTime = document.getElementById('map-stat-time');
-                    if (statTime) {
-                        const h = Math.floor(G.time * 24);
-                        const m = Math.floor((G.time * 24 * 60) % 60);
-                        statTime.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-                    }
-                }
+                updateWorldMap();
             } else if (G.mapOpen) {
                 (window as any).closeWorldMap();
             }
@@ -1016,6 +1362,7 @@ function onMouseDown(event: MouseEvent) {
                     playHitSound();
                     if (obj.health <= 0) {
                         obj.isDead = true;
+                        createParticleBurst(obj.position, 0xff0000);
                         if (obj.children) {
                             obj.children.forEach((child: any) => {
                                 if (child.material) child.material.color.setHex(0x444444);
@@ -1028,10 +1375,17 @@ function onMouseDown(event: MouseEvent) {
                         changeHonor(-10, 'Asesinato');
                         
                         // Update mission if active
-                        if (G.currentMission < G.missions.length && G.missions[G.currentMission].id === 'bandits') {
-                            G.missions[G.currentMission].currentCount!++;
-                            updateMissionUI();
-                            checkMissions();
+                        if (G.currentMission < G.missions.length) {
+                            const curM = G.missions[G.currentMission];
+                            if (curM.type === 'kill' && !obj.isFriendly && !obj.isBoss) {
+                                curM.currentCount!++;
+                                updateMissionUI();
+                                checkMissions();
+                            } else if (curM.type === 'kill_boss' && obj.isBoss) {
+                                curM.currentCount!++;
+                                updateMissionUI();
+                                checkMissions();
+                            }
                         }
                     }
                 }
@@ -1062,15 +1416,29 @@ function updateHUD(delta: number, time: number) {
                 }
             }
         }
+        
+        let nearCampfire = null;
+        if (!nearNPC && !nearFrag) {
+            for (const camp of G.campfires) {
+                if (camera.position.distanceTo(camp.position) < 5) {
+                    nearCampfire = camp;
+                    break;
+                }
+            }
+        }
 
         if (nearNPC) {
-            hint.textContent = '[ E ] Hablar con Bandido';
+            hint.textContent = `[ E ] Hablar con ${nearNPC.name || 'Bandido'}`;
             hint.style.opacity = '1';
             G.interactTarget = nearNPC;
         } else if (nearFrag) {
             hint.textContent = '[ E ] Recoger Fragmento';
             hint.style.opacity = '1';
             G.interactTarget = nearFrag;
+        } else if (nearCampfire) {
+            hint.textContent = '[ E ] Descansar en la fogata';
+            hint.style.opacity = '1';
+            G.interactTarget = nearCampfire;
         } else if (!G.player.mounted && G.horse.mesh && camera.position.distanceTo(G.horse.mesh.position) < 5) {
             hint.textContent = '[ F ] Montar a Ceniza';
             hint.style.opacity = '1';
@@ -1129,6 +1497,7 @@ function updateHUD(delta: number, time: number) {
             ctx.save();
             ctx.translate(cx, cy);
             // Rotate map so player's view is always UP
+            // PointerLockControls uses camera.rotation.y for yaw
             ctx.rotate(camera.rotation.y);
             
             // Draw grid
@@ -1149,26 +1518,33 @@ function updateHUD(delta: number, time: number) {
             }
             ctx.stroke();
 
-            // Draw player vision cone
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            // Draw Vision Cone (Fixed UP)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            ctx.arc(0, 0, cx, -Math.PI / 2 - 0.6, -Math.PI / 2 + 0.6);
+            ctx.arc(0, 0, cx, -Math.PI / 2 - 0.4, -Math.PI / 2 + 0.4);
             ctx.lineTo(0, 0);
             ctx.fill();
             
             // Draw NPCs
-            ctx.fillStyle = '#ff3333'; // Brighter red
             for (const npc of G.npcs) {
                 if (!npc.isDead) {
+                    // Friendly NPCs with missions are BLUE
+                    let color = '#ff3333'; // Default enemy RED
+                    if (npc.isFriendly) {
+                        color = '#3399ff'; // Friendly BLUE
+                    }
+                    if (npc.isBoss) color = '#cc0000';
+                    
+                    ctx.fillStyle = color;
                     const dx = (npc.position.x - camera.position.x) * scale;
                     const dz = (npc.position.z - camera.position.z) * scale;
+                    
                     // Only draw if within radius
                     if (dx*dx + dz*dz < (cx*cx)) {
                         ctx.beginPath();
-                        ctx.arc(dx, dz, 3, 0, Math.PI * 2);
+                        ctx.arc(dx, dz, npc.isBoss ? 5 : 3, 0, Math.PI * 2);
                         ctx.fill();
-                        // Draw small outline
                         ctx.strokeStyle = 'rgba(0,0,0,0.5)';
                         ctx.lineWidth = 1;
                         ctx.stroke();
@@ -1185,6 +1561,18 @@ function updateHUD(delta: number, time: number) {
                     ctx.fillRect(dx - 4, dz - 4, 8, 8);
                     ctx.strokeStyle = 'rgba(200, 150, 30, 0.3)';
                     ctx.strokeRect(dx - 4, dz - 4, 8, 8);
+                }
+            }
+
+            // Draw Campfires
+            ctx.fillStyle = '#ff6600';
+            for (const camp of G.campfires) {
+                const dx = (camp.position.x - camera.position.x) * scale;
+                const dz = (camp.position.z - camera.position.z) * scale;
+                if (dx*dx + dz*dz < (cx*cx)) {
+                    ctx.beginPath();
+                    ctx.arc(dx, dz, 3, 0, Math.PI * 2);
+                    ctx.fill();
                 }
             }
 
@@ -1296,6 +1684,133 @@ function getAvoidanceForce(pos: THREE.Vector3) {
     return force;
 }
 
+function updateWorldMap() {
+    const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement;
+    if (!mapCanvas) return;
+    
+    mapCanvas.width = mapCanvas.clientWidth;
+    mapCanvas.height = mapCanvas.clientHeight;
+    const ctx = mapCanvas.getContext('2d');
+    if (!ctx) return;
+    
+    const cx = mapCanvas.width / 2;
+    const cy = mapCanvas.height / 2;
+    const zoom = G.mapZoom;
+    const off = G.mapOffset;
+    
+    // Background (Terrain)
+    ctx.fillStyle = '#1a140a';
+    ctx.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
+    
+    // Grid
+    ctx.strokeStyle = 'rgba(200, 150, 30, 0.1)';
+    ctx.lineWidth = 1;
+    for (let x = (off.x * zoom) % 50; x < mapCanvas.width; x += 50) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, mapCanvas.height); ctx.stroke();
+    }
+    for (let y = (off.y * zoom) % 50; y < mapCanvas.height; y += 50) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(mapCanvas.width, y); ctx.stroke();
+    }
+    
+    // Draw NPCs
+    for (const npc of G.npcs) {
+        if (!npc.isDead) {
+            const nx = cx + (npc.position.x - camera.position.x + off.x) * zoom;
+            const ny = cy + (npc.position.z - camera.position.z + off.y) * zoom;
+            
+            if (npc.isFriendly) {
+                ctx.fillStyle = '#3b82f6'; // Blue for friendly
+            } else {
+                ctx.fillStyle = npc.isBoss ? '#4a0000' : '#ef4444'; // Red for enemies
+            }
+            
+            ctx.beginPath();
+            ctx.arc(nx, ny, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Name label if close or friendly
+            if (npc.isFriendly || npc.isBoss) {
+                ctx.fillStyle = '#d2b482';
+                ctx.font = '10px Cinzel';
+                ctx.textAlign = 'center';
+                ctx.fillText(npc.name, nx, ny - 8);
+            }
+        }
+    }
+    
+    // Draw Houses
+    ctx.fillStyle = '#4a3018';
+    for (const house of G.houses) {
+        const hx = cx + (house.position.x - camera.position.x + off.x) * zoom;
+        const hy = cy + (house.position.z - camera.position.z + off.y) * zoom;
+        ctx.fillRect(hx - 6, hy - 6, 12, 12);
+        ctx.strokeStyle = '#c8961e';
+        ctx.strokeRect(hx - 6, hy - 6, 12, 12);
+    }
+    
+    // Draw Horse
+    if (!G.player.mounted && G.horse.mesh) {
+        ctx.fillStyle = '#5c4033';
+        const hx = cx + (G.horse.mesh.position.x - camera.position.x + off.x) * zoom;
+        const hy = cy + (G.horse.mesh.position.z - camera.position.z + off.y) * zoom;
+        ctx.beginPath();
+        ctx.arc(hx, hy, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#c8961e';
+        ctx.stroke();
+    }
+    
+    // Draw Mission Target
+    if (G.currentMission < G.missions.length) {
+        const m = G.missions[G.currentMission];
+        if (m.target) {
+            const tx = cx + (m.target.x - camera.position.x + off.x) * zoom;
+            const ty = cy + (m.target.z - camera.position.z + off.y) * zoom;
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.arc(tx, ty, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Pulsing effect
+            ctx.beginPath();
+            ctx.arc(tx, ty, 8 + Math.sin(Date.now() * 0.01) * 4, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 255, 0, 0.5)';
+            ctx.stroke();
+        }
+    }
+    
+    // Draw Player
+    ctx.save();
+    ctx.translate(cx + off.x * zoom, cy + off.y * zoom);
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    const angle = Math.atan2(dir.x, dir.z);
+    ctx.rotate(angle);
+    
+    // Player icon
+    ctx.fillStyle = '#c8961e';
+    ctx.beginPath();
+    ctx.moveTo(0, -10);
+    ctx.lineTo(7, 8);
+    ctx.lineTo(-7, 8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    
+    // Update stats
+    const statMissions = document.getElementById('map-stat-missions');
+    if (statMissions) statMissions.textContent = `${G.currentMission}/${G.missions.length}`;
+    const statTime = document.getElementById('map-stat-time');
+    if (statTime) {
+        const h = Math.floor(G.time * 24);
+        const m = Math.floor((G.time * 24 * 60) % 60);
+        statTime.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    }
+}
+
 function loop() {
     requestAnimationFrame(loop);
 
@@ -1325,7 +1840,72 @@ function loop() {
             if (effect.type === 'impact') {
                 effect.mesh.scale.setScalar(1 + (0.2 - effect.life) * 5);
                 effect.mesh.material.opacity = effect.life / 0.2;
+            } else if (effect.vels) {
+                // Particle burst
+                const posAttr = effect.mesh.geometry.attributes.position;
+                for (let j = 0; j < effect.vels.length; j++) {
+                    posAttr.array[j * 3] += effect.vels[j].x * delta;
+                    posAttr.array[j * 3 + 1] += effect.vels[j].y * delta;
+                    posAttr.array[j * 3 + 2] += effect.vels[j].z * delta;
+                    effect.vels[j].y -= 9.8 * delta; // Gravity
+                }
+                posAttr.needsUpdate = true;
+                effect.mesh.material.opacity = effect.life;
             }
+        }
+    }
+
+    // Weapon Bobbing and Recoil
+    if (G.weaponMesh) {
+        const speed = isRunning ? 12 : 6;
+        const amplitude = isRunning ? 0.05 : 0.02;
+        const isMoving = moveForward || moveBackward || moveLeft || moveRight;
+        
+        if (isMoving && G.canJump) {
+            G.weaponBob += delta * speed;
+            G.weaponMesh.position.y = -0.4 + Math.sin(G.weaponBob) * amplitude;
+            G.weaponMesh.position.x = 0.4 + Math.cos(G.weaponBob * 0.5) * amplitude * 0.5;
+            
+            // Footsteps
+            G.footstepTimer += delta * speed;
+            if (G.footstepTimer > Math.PI) {
+                G.footstepTimer = 0;
+                playFootstep();
+            }
+        } else {
+            G.weaponMesh.position.y += (-0.4 - G.weaponMesh.position.y) * 0.1;
+            G.weaponMesh.position.x += (0.4 - G.weaponMesh.position.x) * 0.1;
+            G.footstepTimer = 0;
+        }
+        
+        // Recoil
+        if (G.weaponRecoil > 0) {
+            G.weaponRecoil -= delta * 5;
+            G.weaponMesh.position.z = -0.6 + G.weaponRecoil * 0.2;
+            G.weaponMesh.rotation.x = -G.weaponRecoil * 0.5;
+        } else {
+            G.weaponRecoil = 0;
+            G.weaponMesh.position.z += (-0.6 - G.weaponMesh.position.z) * 0.2;
+            G.weaponMesh.rotation.x += (0 - G.weaponMesh.rotation.x) * 0.2;
+        }
+    }
+    
+    // Update Campfires
+    for (const camp of G.campfires) {
+        if (camp.light) {
+            camp.light.intensity = 2 + Math.random() * 0.5;
+        }
+        if (camp.particles) {
+            const posAttr = camp.particles.geometry.attributes.position;
+            for (let i = 0; i < posAttr.count; i++) {
+                posAttr.array[i * 3 + 1] += delta * 2; // Move up
+                if (posAttr.array[i * 3 + 1] > 1.5) {
+                    posAttr.array[i * 3 + 1] = 0; // Reset height
+                    posAttr.array[i * 3] = (Math.random() - 0.5) * 0.5; // Random X
+                    posAttr.array[i * 3 + 2] = (Math.random() - 0.5) * 0.5; // Random Z
+                }
+            }
+            posAttr.needsUpdate = true;
         }
     }
 
@@ -1345,11 +1925,33 @@ function loop() {
 
         controls.moveRight(-velocity.x * delta);
         controls.moveForward(-velocity.z * delta);
+        camera.position.y += (velocity.y * delta);
 
         // Basic collision with ground
-        if (camera.position.y < (G.player.mounted ? 3.5 : 2)) {
+        const groundY = (G.player.mounted ? 3.5 : 2);
+        if (camera.position.y < groundY) {
             velocity.y = 0;
-            camera.position.y = (G.player.mounted ? 3.5 : 2);
+            camera.position.y = groundY;
+            G.canJump = true;
+        }
+    }
+
+    // Update Reloading
+    if (G.isReloading) {
+        G.reloadProgress += delta / 2; // 2 seconds to reload
+        const progressCircle = document.getElementById('reload-progress');
+        if (progressCircle) {
+            const offset = 157 - (G.reloadProgress * 157);
+            progressCircle.setAttribute('stroke-dashoffset', Math.max(0, offset).toString());
+        }
+        
+        if (G.reloadProgress >= 1) {
+            G.isReloading = false;
+            G.player.ammo = 6;
+            updateAmmoHUD();
+            const reloadUI = document.getElementById('reload-ui');
+            if (reloadUI) reloadUI.style.opacity = '0';
+            showNotif('Arma recargada');
         }
     }
 
@@ -1358,6 +1960,16 @@ function loop() {
         if (!npc.isDead) {
             const distToPlayer = npc.position.distanceTo(camera.position);
             
+            // NPC Footsteps
+            if (distToPlayer < 20 && !npc.isFriendly) {
+                if (!npc.footstepTimer) npc.footstepTimer = 0;
+                npc.footstepTimer += delta * 5;
+                if (npc.footstepTimer > Math.PI) {
+                    npc.footstepTimer = 0;
+                    playEnemyFootstep(distToPlayer);
+                }
+            }
+
             if (distToPlayer < 15) {
                 // Attack player
                 npc.rotation.y = Math.atan2(camera.position.x - npc.position.x, camera.position.z - npc.position.z);
@@ -1385,6 +1997,7 @@ function loop() {
                         G.player.health -= 10;
                         updateHealthHUD();
                         playHitSound();
+                        flashScreenRed();
                         showNotif('¡Te están atacando!');
                         npc.attackCooldown = 1.5;
                         
@@ -1583,6 +2196,49 @@ export function startGame(tutorial = false) {
 
 // Attach to window for HTML buttons
 (window as any).startGame = startGame;
+(window as any).openShop = () => {
+    const shop = document.getElementById('shop-ui');
+    if (shop) shop.classList.add('visible');
+    const money = document.getElementById('shop-money');
+    if (money) money.textContent = `$${G.money}`;
+    controls.unlock();
+};
+(window as any).closeShop = () => {
+    const shop = document.getElementById('shop-ui');
+    if (shop) shop.classList.remove('visible');
+    if (G.started && !G.monologueOpen && !G.inventoryOpen && !G.journalOpen && !G.mapOpen) controls.lock();
+};
+(window as any).buyItem = (type: string, price: number) => {
+    if (G.money >= price) {
+        G.money -= price;
+        const moneyDisplay = document.getElementById('moneyDisplay');
+        if (moneyDisplay) moneyDisplay.textContent = `$${G.money}`;
+        const shopMoney = document.getElementById('shop-money');
+        if (shopMoney) shopMoney.textContent = `$${G.money}`;
+        
+        if (type === 'ammo') {
+            G.player.ammo = 6;
+            updateAmmoHUD();
+            showNotif('Compraste munición');
+            
+            const mission = G.missions[G.currentMission];
+            if (mission && mission.type === 'buy' && mission.targetItem === 'ammo') {
+                advanceMission();
+            }
+        } else if (type === 'health') {
+            G.player.health = Math.min(100, G.player.health + 50);
+            updateHealthHUD();
+            flashScreenGreen();
+            showNotif('Compraste tónico de salud');
+        } else if (type === 'stamina') {
+            G.horse.stamina = 100;
+            showNotif('Ceniza está recuperada');
+        }
+        playMissionCompleteSound();
+    } else {
+        showNotif('No tienes suficiente dinero');
+    }
+};
 (window as any).closeTutorial = () => {
     const tut = document.getElementById('tutorial-overlay');
     if (tut) {
