@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --font-cinzel: "Cinzel", serif;
+  --font-crimson: "Crimson Text", serif;
+}
+
+body {
+  cursor: none;
+}
+
+@keyframes titlePulse {
+  0%, 100% { text-shadow: 0 0 60px rgba(200, 150, 30, 0.4); }
+  50% { text-shadow: 0 0 100px rgba(200, 150, 30, 0.8); }
+}
+
+@keyframes fireFlicker {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes monologueIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes journalIn {
+  from { opacity: 0; transform: translate(-50%, -48%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+@keyframes noteAppear {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes honorFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -100px) scale(1.5); }
+}
+
+.animate-titlePulse { animation: titlePulse 3s ease-in-out infinite; }
+.animate-fireFlicker { animation: fireFlicker 1.2s ease-in-out infinite; }
+.animate-monologueIn { animation: monologueIn 1s ease forwards; }
+.animate-journalIn { animation: journalIn 0.4s ease forwards; }
+.animate-noteAppear { animation: noteAppear 0.4s ease forwards; }
+.animate-blink { animation: blink 2s infinite; }
+.animate-honorFloat { animation: honorFloat 2s ease-out forwards; }
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(180, 130, 60, 0.05);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(180, 130, 60, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(180, 130, 60, 0.5);
+}
+
+.epilogue-stat {
+  @apply flex flex-col items-center text-center;
+}
+.epilogue-stat-label {
+  @apply font-cinzel text-[10px] text-[#a0783c]/60 tracking-[0.3em] uppercase mb-1;
+}
+.epilogue-stat-value {
+  @apply font-crimson text-lg text-[#dcb46e];
+}
+.epilogue-fragments-title {
+  @apply font-cinzel text-sm text-[#c8961e] tracking-[0.4em] uppercase text-center mb-6;
+}
+.epilogue-fragment-list {
+  @apply flex flex-wrap justify-center gap-3;
+}
+.epilogue-fragment-item {
+  @apply font-crimson italic text-sm px-4 py-2 border border-[#a0783c]/20 text-[#a0783c]/40 bg-[#a0783c]/5 rounded-sm transition-all;
+}
+.epilogue-fragment-item.found {
+  @apply border-[#c8961e]/50 text-[#dcb46e] bg-[#c8961e]/10 shadow-[0_0_10px_rgba(200,150,30,0.1)];
+}
